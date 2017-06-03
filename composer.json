@@ -1,0 +1,28 @@
+{
+    "name": "edujugon/laravel-tablediff",
+    "description": "Compare the values of two tables and either returns the differences or update the data with the new values.",
+    "keywords": ["tableDiff","laravel","package","differences"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eduardo Marcos",
+            "email": "edujugon@gmail.com"
+        }
+    ],
+    "require": {
+        "illuminate/support": "^5.4",
+        "illuminate/database": "^5.4"
+    },
+    "require-dev": {
+      "phpunit/phpunit": "~5.0",
+        "orchestra/testbench": "^3.4",
+        "orchestra/database": "^3.4"
+    },
+    "autoload": {
+      "psr-4": {
+        "Edujugon\\TableDiff\\": "src/",
+        "Edujugon\\TableDiffTest\\": "tests/"
+      }
+    },
+    "minimum-stability": "dev"
+}
