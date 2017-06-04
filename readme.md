@@ -1,3 +1,3 @@
-# TableDiff Laravel Package
+# TableDiff - Laravel Package
 
-Compare values of tables.
+Comparing tables data.

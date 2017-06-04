@@ -173,7 +173,7 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
             ->pivot('id')
             ->run()
             ->withReport();
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->unMatched());
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->matched());
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->added());
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->updated());
     }
 }
