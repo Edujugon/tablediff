@@ -321,7 +321,18 @@ class TableDiff
         return $this->insertedRecords;
     }
 
-    //
+    /**
+     * Set the primary key of the base table.
+     *
+     * @param $key
+     * @return $this
+     */
+    public function setPrimaryKey($key)
+    {
+        $this->primaryKey = $key;
+
+        return $this;
+    }
 
     //
     //PRIVATE METHODS
