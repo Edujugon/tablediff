@@ -1,5 +1,5 @@
 {
-    "name": "edujugon/laravel-tablediff",
+    "name": "edujugon/tablediff",
     "description": "Compare the values of two tables and either returns the differences or update the data with the new values.",
     "keywords": ["tableDiff","laravel","package","differences"],
     "license": "MIT",
