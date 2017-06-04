@@ -420,7 +420,7 @@ class TableDiff
     private function insertUnMatched()
     {
 
-        $this->report->unMatched()->chunk(10)->each(function ($collect) {
+        $this->report->added()->chunk(10)->each(function ($collect) {
             $newElements = $collect->map(function ($item) {
 
                 //Unset primary key property because it can create Integrity constraint violation: Duplicate ID
@@ -454,7 +454,7 @@ class TableDiff
      */
     private function initReport()
     {
-        $this->report->matched()->each(function ($item) {
+        $this->report->updated()->each(function ($item) {
 
             $newElement = $this->findMeIn($this->mergeCollection, $item);
 
@@ -531,7 +531,9 @@ class TableDiff
     }
 
     /**
-     * Get value from base table column and value from merge table column
+     * Create diff Report where the key is the primary key of the base table record
+     * The value is an array were the array's key is the old value
+     * and the array's value is the new value to be set.
      *
      * @param $newElement
      * @param $oldElement
@@ -543,13 +545,13 @@ class TableDiff
         foreach ($data as $key => $newValue) {
 
             if (!property_exists($oldElement, $key)) {
-                $this->report->diff()->$key[] = ['null' => $newValue];
+                $this->report->diff()->$key[$oldElement->{$this->primaryKey}] = ['null' => $newValue];
 
                 continue;
             }
 
             if ($newValue != $oldElement->$key) {
-                $this->report->diff()->$key[] = [$oldElement->$key => $newValue];
+                $this->report->diff()->$key[$oldElement->{$this->primaryKey}] = [$oldElement->$key => $newValue];
             }
 
         }
@@ -572,9 +574,9 @@ class TableDiff
             $found = $search->first();
 
             if (!$found) {
-                $this->report->unMatched()->push($item);
+                $this->report->added()->push($item);
             } else {
-                $this->report->matched()->push($found);
+                $this->report->updated()->push($found);
             }
 
         }
@@ -686,25 +688,6 @@ class TableDiff
     {
         if (!Schema::hasTable($name))
             throw new TableDiffException('Table not found');
-    }
-
-
-    //
-    //MAGIC METHODS
-    //
-
-    /**
-     * Magic access
-     *
-     * @param $name
-     * @return mixed
-     */
-    function __get($name)
-    {
-        if (property_exists($this, $name))
-            return $this->$name;
-
-        return false;
     }
 
 

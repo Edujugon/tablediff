@@ -19,21 +19,23 @@ class MyReport
 {
 
     /**
-     * Matched records (base table)
+     * Collection of records to be updated (base table)
      *
      * @var Collection
      */
-    protected $matched;
+    protected $updated;
 
     /**
-     * Unmatched records (merge table)
+     * Collection of records to be added (merge table)
      *
      * @var Collection
      */
-    protected $unMatched;
+    protected $added;
 
     /**
-     * Collection
+     * Object with base table columns as properties which are arrays of key value pairs.
+     * The array's key is the primary key of the base table record and
+     * the arrays's value is an array with the old value and the new value.
      *
      * @var \stdClass
      */
@@ -46,33 +48,33 @@ class MyReport
      */
     function __construct()
     {
-        $this->matched = collect();
-        $this->unMatched = collect();
+        $this->updated = collect();
+        $this->added = collect();
         $this->diff = new \stdClass();
     }
 
     /**
-     * Get matched records.
+     * Get a collection of records to be updated
      *
      * @return Collection
      */
-    public function matched()
+    public function updated()
     {
-        return $this->matched;
+        return $this->updated;
     }
 
     /**
-     * Get unmatched records
+     * Get a collection of records to be added
      *
      * @return Collection
      */
-    public function unMatched()
+    public function added()
     {
-        return $this->unMatched;
+        return $this->added;
     }
 
     /**
-     * Get the differences between base and merge tables.
+     * Get the differences between base and merge tables
      *
      * @return \stdClass
      */
