@@ -91,24 +91,24 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
     /** @test */
     public function throw_an_exception_if_no_tables()
     {
-        $this->expectExceptionMessage("Required data for 'pivots' method: baseTable, mergeTable");
+        $this->setExpectedException(\Edujugon\TableDiff\Exceptions\TableDiffException::class);
         $this->diff->pivots('main_areas', 'sub_areas')->run();
     }
 
     /** @test */
     public function throw_an_exception_if_no_pivots()
     {
-        $this->expectExceptionMessage("Required data for 'run' method: pivots");
+        $this->setExpectedException(\Edujugon\TableDiff\Exceptions\TableDiffException::class);
         $this->diff->tables('main_areas', 'sub_areas')->run();
     }
 
     /** @test */
     public function get_report_of_changes()
     {
-        $report = $this->diff->tables('main_areas','sub_areas')
-            ->pivot('id')
-            ->run()
-            ->withReport();
+        $this->diff->tables('main_areas','sub_areas');
+        $this->diff->pivot('id');
+        $this->diff->run();
+        $report = $this->diff->withReport();
 
         $this->assertObjectHasAttribute('country',$report->diff());
         $this->assertObjectHasAttribute('description',$report->diff());
@@ -167,12 +167,25 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
     }
 
     /** @test */
-    public function check_matched_and_unmatched()
+    public function check_added_and_updated()
     {
         $report = $this->diff->tables('main_areas','sub_areas')
             ->pivot('id')
             ->run()
             ->withReport();
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->added());
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->updated());
+    }
+
+    /** @test */
+    public function set_a_different_primary_key()
+    {
+        $report = $this->diff->tables('main_areas','sub_areas')
+            ->setPrimaryKey('name')
+            ->pivot('name')
+            ->run()
+            ->withReport();
+
         $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->added());
         $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->updated());
     }
