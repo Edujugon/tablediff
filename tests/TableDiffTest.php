@@ -231,4 +231,17 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
                 $this->assertArrayNotHasKey('id',$list[0]);
             });
     }
+
+    /** @test */
+    public function inserted_and_updated_records_have_been_increased()
+    {
+        $report = $this->diff->tables('main_areas','sub_areas')
+            ->pivot('id')
+            ->column('city')
+            ->merge()
+            ->withReport();
+
+        $this->assertEquals(3,$report->updatedRecords());
+        $this->assertEquals(2,$report->insertedRecords());
+    }
 }
