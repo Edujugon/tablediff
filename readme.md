@@ -52,7 +52,7 @@ If the columns have the same name you could do it like follows:
 $diff->pivot('pivot_name');
 ```
 
-Now, we can run the comparision and get the report
+Now, we can run the comparison and get the report
  
  ```php
 $report = $diff->run()->withReport();
