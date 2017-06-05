@@ -1,6 +1,6 @@
-# TableDiff - Laravel Package
+# TableDiff
 
-Comparing tables data.
+Comparing DB tables data for Laravel.
 
 ## Installation
 
