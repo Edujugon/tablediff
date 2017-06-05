@@ -83,9 +83,9 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
             ->pivot('id')
             ->columns(['country' => 'country'])
             ->merge();
-        $updatedCountry = \Edujugon\TableDiffTest\Models\MainArea::first()->country;
+        $matchedCountry = \Edujugon\TableDiffTest\Models\MainArea::first()->country;
 
-        $this->assertNotEquals($country, $updatedCountry);
+        $this->assertNotEquals($country, $matchedCountry);
     }
 
     /** @test */
@@ -167,14 +167,14 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
     }
 
     /** @test */
-    public function check_added_and_updated()
+    public function check_unmatched_and_matched()
     {
         $report = $this->diff->tables('main_areas','sub_areas')
             ->pivot('id')
             ->run()
             ->withReport();
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->added());
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->updated());
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->unmatched());
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->matched());
     }
 
     /** @test */
@@ -186,7 +186,49 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
             ->run()
             ->withReport();
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->added());
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->updated());
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->unmatched());
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class,$report->matched());
+
+        $this->diff->setPrimaryKey('id');
+    }
+
+    /** @test */
+    public function using_callback_in_merge_matched()
+    {
+        $this->diff->tables('main_areas','sub_areas')
+            ->pivot('id')
+            ->column('city')
+            ->mergeMatched(function($collection,$data){
+                $subArea = \Edujugon\TableDiffTest\Models\SubArea::where('id',$collection->first()->id)->first();
+
+                $this->assertEquals($data->city,$subArea->city);
+            });
+    }
+
+    /** @test */
+    public function using_callback_in_merge()
+    {
+        $this->diff->tables('main_areas','sub_areas')
+            ->pivot('id')
+            ->column('city')
+            ->merge(function($collection,$data){
+                $subArea = \Edujugon\TableDiffTest\Models\SubArea::where('id',$collection->first()->id)->first();
+
+                $this->assertEquals($data->city,$subArea->city);
+            });
+    }
+
+    /** @test */
+    public function using_callback_in_merge_unmatched()
+    {
+        $this->diff->tables('main_areas','sub_areas')
+            ->pivot('id')
+            ->column('city')
+            ->mergeUnMatched(function($list){
+
+                $this->assertCount(2,$list);
+                $this->assertArrayHasKey('city',$list[0]);
+                $this->assertArrayNotHasKey('id',$list[0]);
+            });
     }
 }

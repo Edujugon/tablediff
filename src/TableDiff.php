@@ -254,16 +254,15 @@ class TableDiff
      * Update Base table items with Merge table values.
      * Also Insert new values from merge table to base table.
      *
+     * @param callable $callback
      * @return $this
      */
-    public function merge()
+    public function merge($callback = null)
     {
 
-        //If no executed run method then run it now.
-        if (!$this->mergeCollection && !$this->baseCollection)
-            $this->run();
+        $this->forgotRun();
 
-        $this->mergeMatched();
+        $this->mergeMatched($callback);
         $this->mergeUnMatched();
 
         return $this;
@@ -272,13 +271,16 @@ class TableDiff
     /**
      * Insert new values that are in merge table but not in base table.
      *
+     * @param callable $callback
      * @return $this
      */
-    public function mergeUnMatched()
+    public function mergeUnMatched($callback = null)
     {
+        $this->forgotRun();
+
         $this->createNewColumnsInBaseTable();
 
-        $this->insertUnMatched();
+        $this->insertUnMatched($callback);
 
         return $this;
     }
@@ -287,13 +289,16 @@ class TableDiff
      * Update Base table values with Matched Merge table values.
      * !Notice it won't update the new items found in merge that are not in base table.
      *
+     * @param callable $callback
      * @return $this
      */
-    public function mergeMatched()
+    public function mergeMatched($callback = null)
     {
+        $this->forgotRun();
+
         $this->createNewColumnsInBaseTable();
 
-        $this->updateBaseTable();
+        $this->updateBaseTable($callback);
 
         return $this;
     }
@@ -338,6 +343,16 @@ class TableDiff
     //PRIVATE METHODS
     //
 
+
+    /**
+     * Execute run method if forgotten
+     */
+    private function forgotRun()
+    {
+        //If no executed run method then run it now.
+        if (!$this->mergeCollection && !$this->baseCollection)
+            $this->run();
+    }
 
     /**
      * Set associative properties.
@@ -392,10 +407,11 @@ class TableDiff
 
 
     /**
-     * Update values based on the matched collection.
+     * Update values based on the matched collection
      *
+     * @param callable $callback
      */
-    private function updateBaseTable()
+    private function updateBaseTable($callback = null)
     {
         foreach ($this->mergeCollection as $key => $item) {
             $query = DB::table($this->baseTable);
@@ -418,20 +434,31 @@ class TableDiff
                 $item = $newItem;
             }
 
+            $updated = $query->update(get_object_vars($item));
 
-            $this->updatedRecords += $query->update(get_object_vars($item));
+            if($updated)
+            {
+                $this->updatedRecords += $updated;
+
+                $collection = $query->get();
+
+                if(is_callable($callback))
+                    $callback($collection,$item);
+
+            }
         }
 
     }
 
     /**
-     * Insert new elements into base table.
+     * Insert new elements into base table
      *
+     * @param callable $callback
      */
-    private function insertUnMatched()
+    private function insertUnMatched($callback = null)
     {
 
-        $this->report->added()->chunk(10)->each(function ($collect) {
+        $this->report->unmatched()->chunk(10)->each(function ($collect) use($callback) {
             $newElements = $collect->map(function ($item) {
 
                 //Unset primary key property because it can create Integrity constraint violation: Duplicate ID
@@ -443,9 +470,6 @@ class TableDiff
                     foreach ($this->columns as $baseColumn => $mergeColumn) {
                         $newItem->$baseColumn = $item->$mergeColumn;
                     }
-                    foreach ($this->pivots as $baseColumn => $mergeColumn) {
-                        $newItem->$baseColumn = $item->$mergeColumn;
-                    }
 
                     $item = $newItem;
                 }
@@ -454,8 +478,19 @@ class TableDiff
 
             })->toArray();
 
-            if (!empty($newElements))
-                $this->insertedRecords += DB::table($this->baseTable)->insert($newElements);
+            if (!empty($newElements)){
+                $inserted = DB::table($this->baseTable)->insert($newElements);
+
+                if($inserted)
+                {
+                    $this->insertedRecords += $inserted;
+
+                    if(is_callable($callback))
+                        $callback($newElements);
+                }
+
+            }
+
         });
 
     }
@@ -465,7 +500,7 @@ class TableDiff
      */
     private function initReport()
     {
-        $this->report->updated()->each(function ($item) {
+        $this->report->matched()->each(function ($item) {
 
             $newElement = $this->findMeIn($this->mergeCollection, $item);
 
@@ -592,9 +627,9 @@ class TableDiff
             $found = $search->first();
 
             if (!$found) {
-                $this->report->added()->push($item);
+                $this->report->unmatched()->push($item);
             } else {
-                $this->report->updated()->push($found);
+                $this->report->matched()->push($found);
             }
 
         }

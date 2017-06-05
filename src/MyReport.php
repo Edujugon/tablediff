@@ -19,18 +19,18 @@ class MyReport
 {
 
     /**
-     * Collection of records to be updated (base table)
+     * Collection of records that have matched (base table list)
      *
      * @var Collection
      */
-    protected $updated;
+    protected $matched;
 
     /**
-     * Collection of records to be added (merge table)
+     * Collection of records that haven't matched (merge table list)
      *
      * @var Collection
      */
-    protected $added;
+    protected $unmatched;
 
     /**
      * Object with base table columns as properties which are arrays of key value pairs.
@@ -48,29 +48,29 @@ class MyReport
      */
     function __construct()
     {
-        $this->updated = collect();
-        $this->added = collect();
+        $this->matched = collect();
+        $this->unmatched = collect();
         $this->diff = new \stdClass();
     }
 
     /**
-     * Get a collection of records to be updated
+     * Get matched collection from base table
      *
      * @return Collection
      */
-    public function updated()
+    public function matched()
     {
-        return $this->updated;
+        return $this->matched;
     }
 
     /**
-     * Get a collection of records to be added
+     * Get unmatched collection from merge table
      *
      * @return Collection
      */
-    public function added()
+    public function unmatched()
     {
-        return $this->added;
+        return $this->unmatched;
     }
 
     /**
