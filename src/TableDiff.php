@@ -409,7 +409,7 @@ class TableDiff
 
             if (!empty($this->columns)) {
 
-                $newItem = new MyReport();
+                $newItem = new \stdClass();
 
                 foreach ($this->columns as $baseColumn => $mergeColumn) {
                     $newItem->$baseColumn = $item->$mergeColumn;
@@ -439,7 +439,7 @@ class TableDiff
                     unset($item->{$this->primaryKey});
 
                 if (!empty($this->columns)) {
-                    $newItem = new MyReport();
+                    $newItem = new \stdClass();
                     foreach ($this->columns as $baseColumn => $mergeColumn) {
                         $newItem->$baseColumn = $item->$mergeColumn;
                     }
