@@ -516,55 +516,62 @@ class TableDiff
     private function fillReport($newElement, $oldElement)
     {
 
-        if ($newElement !== $oldElement) {
+        if($newElement !== $oldElement){
 
-            $this->addDataToReport($newElement, $oldElement);
+            // It will search by column name matching
+            if(empty($this->columns))
+                $this->allColumns($newElement,$oldElement);
+            else
+                $this->byColumns($newElement,$oldElement);
         }
     }
 
     /**
-     * Create a new array based on passed columns
-     *
-     * @param $array
-     * @return array
-     */
-    private function onlyInColumns($array)
-    {
-        $new = [];
-
-        foreach ($this->columns as $column) {
-            if (array_key_exists($column, $array)) {
-                $new[$column] = $array[$column];
-            }
-        }
-
-        return $new;
-    }
-
-    /**
-     * Create diff Report where the key is the primary key of the base table record
-     * The value is an array were the array's key is the old value
-     * and the array's value is the new value to be set.
+     * Get value from base table column and value from merge table column
+     * Based on the associative array with columns.
      *
      * @param $newElement
      * @param $oldElement
      */
-    private function addDataToReport($newElement, $oldElement)
+    private function byColumns($newElement, $oldElement)
     {
-        $data = empty($this->columns) ? get_object_vars($newElement) : $this->onlyInColumns(get_object_vars($newElement));
 
-        foreach ($data as $key => $newValue) {
+        foreach ($this->columns as $baseColumn => $mergeColumn){
 
-            if (!property_exists($oldElement, $key)) {
+            if(!property_exists($oldElement,$baseColumn)){
+
+                $this->report->diff()->$baseColumn[$oldElement->{$this->primaryKey}] = ['null' => $newElement->$mergeColumn];
+
+                continue;
+            }
+
+            if($newElement->$mergeColumn != $oldElement->$baseColumn){
+
+                $this->report->diff()->$baseColumn[$oldElement->{$this->primaryKey}] = [$oldElement->$baseColumn => $newElement->$mergeColumn];
+            }
+
+        }
+    }
+
+    /**
+     * Based on column name matching
+     *
+     * @param $newElement
+     * @param $oldElement
+     */
+    private function allColumns($newElement, $oldElement)
+    {
+
+        foreach (get_object_vars($newElement) as $key => $newValue){
+
+            if(!property_exists($oldElement,$key)){
                 $this->report->diff()->$key[$oldElement->{$this->primaryKey}] = ['null' => $newValue];
 
                 continue;
             }
 
-            if ($newValue != $oldElement->$key) {
+            if($newValue != $oldElement->$key)
                 $this->report->diff()->$key[$oldElement->{$this->primaryKey}] = [$oldElement->$key => $newValue];
-            }
-
         }
     }
 
