@@ -82,20 +82,6 @@ class TableDiff
      */
     protected $primaryKey = 'id';
 
-    /**
-     * Amount of updated records by matching after the merge
-     *
-     * @var int
-     */
-    protected $updatedRecords = 0;
-
-    /**
-     * Amount of inserted records
-     *
-     * @var int
-     */
-    protected $insertedRecords = 0;
-
     //
     //API METHODS
     //
@@ -307,26 +293,6 @@ class TableDiff
     //GETTERS
 
     /**
-     * Count updated records
-     *
-     * @return int
-     */
-    public function updatedRows()
-    {
-        return $this->updatedRecords;
-    }
-
-    /**
-     * Count inserted new records
-     *
-     * @return int
-     */
-    public function insertedRows()
-    {
-        return $this->insertedRecords;
-    }
-
-    /**
      * Set the primary key of the base table.
      *
      * @param $key
@@ -413,7 +379,7 @@ class TableDiff
      */
     private function updateBaseTable($callback = null)
     {
-        foreach ($this->mergeCollection as $key => $item) {
+        $this->mergeCollection->each(function($item,$key) use($callback) {
             $query = DB::table($this->baseTable);
 
             foreach ($this->pivots as $basePivot => $mergePivot) {
@@ -438,7 +404,7 @@ class TableDiff
 
             if($updated)
             {
-                $this->updatedRecords += $updated;
+                $this->report->addUpdatedRecords($updated);
 
                 $collection = $query->get();
 
@@ -446,7 +412,7 @@ class TableDiff
                     $callback($collection,$item);
 
             }
-        }
+        });
 
     }
 
@@ -483,7 +449,7 @@ class TableDiff
 
                 if($inserted)
                 {
-                    $this->insertedRecords += $inserted;
+                    $this->report->addInsertedRecords(count($newElements));
 
                     if(is_callable($callback))
                         $callback($newElements);

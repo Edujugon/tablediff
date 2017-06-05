@@ -33,6 +33,20 @@ class MyReport
     protected $unmatched;
 
     /**
+     * Amount of updated records by matching after the merge
+     *
+     * @var int
+     */
+    protected $updatedRecords = 0;
+
+    /**
+     * Amount of inserted records
+     *
+     * @var int
+     */
+    protected $insertedRecords = 0;
+
+    /**
      * Object with base table columns as properties which are arrays of key value pairs.
      * The array's key is the primary key of the base table record and
      * the arrays's value is an array with the old value and the new value.
@@ -51,6 +65,48 @@ class MyReport
         $this->matched = collect();
         $this->unmatched = collect();
         $this->diff = new \stdClass();
+    }
+
+    /**
+     * Add updated records
+     *
+     * @param int $amount
+     * @return int
+     */
+    public function addUpdatedRecords($amount)
+    {
+        return $this->updatedRecords += $amount;
+    }
+
+    /**
+     * Add inserted new records
+     *
+     * @param int $amount
+     * @return int
+     */
+    public function addInsertedRecords($amount)
+    {
+        return $this->insertedRecords += $amount;
+    }
+
+    /**
+     * Count updated records
+     *
+     * @return int
+     */
+    public function updatedRecords()
+    {
+        return $this->updatedRecords;
+    }
+
+    /**
+     * Count inserted new records
+     *
+     * @return int
+     */
+    public function insertedRecords()
+    {
+        return $this->insertedRecords;
     }
 
     /**
