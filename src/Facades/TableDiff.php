@@ -9,6 +9,6 @@ class TableDiff extends Facade {
      *
      * @return string
      */
-    protected static function getFacadeAccessor() { return TableDiff::class; }
+    protected static function getFacadeAccessor() { return \Edujugon\TableDiff\TableDiff::class; }
 
 }
