@@ -241,14 +241,15 @@ class TableDiff
      * Also Insert new values from merge table to base table.
      *
      * @param callable $callback
+     * @param null $preCallBack
      * @return $this
      */
-    public function merge($callback = null)
+    public function merge($callback = null,$preCallBack = null)
     {
 
         $this->forgotRun();
 
-        $this->mergeMatched($callback);
+        $this->mergeMatched($callback,$preCallBack);
         $this->mergeUnMatched();
 
         return $this;
@@ -258,15 +259,16 @@ class TableDiff
      * Insert new values that are in merge table but not in base table.
      *
      * @param callable $callback
+     * @param null $preCallback
      * @return $this
      */
-    public function mergeUnMatched($callback = null)
+    public function mergeUnMatched($callback = null,$preCallback = null)
     {
         $this->forgotRun();
 
         $this->createNewColumnsInBaseTable();
 
-        $this->insertUnMatched($callback);
+        $this->insertUnMatched($callback,$preCallback);
 
         return $this;
     }
@@ -276,15 +278,16 @@ class TableDiff
      * !Notice it won't update the new items found in merge that are not in base table.
      *
      * @param callable $callback
+     * @param $preCallback
      * @return $this
      */
-    public function mergeMatched($callback = null)
+    public function mergeMatched($callback = null,$preCallback = null)
     {
         $this->forgotRun();
 
         $this->createNewColumnsInBaseTable();
 
-        $this->updateBaseTable($callback);
+        $this->updateBaseTable($callback,$preCallback);
 
         return $this;
     }
@@ -376,10 +379,11 @@ class TableDiff
      * Update values based on the matched collection
      *
      * @param callable $callback
+     * @param callable $preCallback
      */
-    private function updateBaseTable($callback = null)
+    private function updateBaseTable($callback = null,$preCallback = null)
     {
-        $this->mergeCollection->each(function($item,$key) use($callback) {
+        foreach ($this->mergeCollection as $key => $item) {
             $query = DB::table($this->baseTable);
 
             foreach ($this->pivots as $basePivot => $mergePivot) {
@@ -400,6 +404,9 @@ class TableDiff
                 $item = $newItem;
             }
 
+            if(is_callable($preCallback))
+                $preCallback($item);
+
             $updated = $query->update(get_object_vars($item));
 
             if($updated)
@@ -412,7 +419,7 @@ class TableDiff
                     $callback($collection,$item);
 
             }
-        });
+        }
 
     }
 
@@ -420,12 +427,13 @@ class TableDiff
      * Insert new elements into base table
      *
      * @param callable $callback
+     * @param null $preCallback
      */
-    private function insertUnMatched($callback = null)
+    private function insertUnMatched($callback = null,$preCallback = null)
     {
 
-        $this->report->unmatched()->chunk(10)->each(function ($collect) use($callback) {
-            $newElements = $collect->map(function ($item) {
+        $this->report->unmatched()->chunk(10)->each(function ($collect) use($callback,$preCallback) {
+            $newElements = $collect->map(function ($item,$preCallback) {
 
                 //Unset primary key property because it can create Integrity constraint violation: Duplicate ID
                 if (!in_array($this->primaryKey, $this->columns) && !in_array($this->primaryKey, $this->pivots))
@@ -439,6 +447,9 @@ class TableDiff
 
                     $item = $newItem;
                 }
+
+                if(is_callable($preCallback))
+                    $preCallback($item);
 
                 return get_object_vars($item);
 

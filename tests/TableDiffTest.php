@@ -244,4 +244,21 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
         $this->assertEquals(3,$report->updatedRecords());
         $this->assertEquals(2,$report->insertedRecords());
     }
+
+    /** @test */
+    public function casting_data_before_merge()
+    {
+        $city = '';
+
+        $report = $this->diff->tables('main_areas','sub_areas')
+            ->pivot('id')
+            ->column('city')
+            ->merge(function($collection,$data) use($city){
+                $this->assertNotEquals($city,$data->city);
+            },function(&$data) use($city){
+
+                $city = $data->city;
+                $data->city = strtoupper($data->city);
+            });
+    }
 }
