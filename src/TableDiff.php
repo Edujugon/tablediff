@@ -664,6 +664,7 @@ class TableDiff
     {
         foreach ($columns as $baseColumn => $mergeColumn) {
             $this->existsInTable($this->mergeTable, $mergeColumn);
+            $this->existsInTable($this->baseTable, $baseColumn);
         }
 
     }
