@@ -54,15 +54,88 @@ $diff->pivot('pivot_name');
 
 Now, we can run the comparison and get the report
  
- ```php
+```php
 $report = $diff->run()->withReport();
 ```
 
 Of course, all those methods can be chained
 
 ```php
-$report = $diff->tables('base_table_pivot','merge_table_pivot')
+$report = $diff->tables('base_table','merge_table')
             ->pivot('pivot_name')
             ->run()
             ->withReport();
+```
+
+> Notice if you don't use `column` method, it will look for all columns with same name in both tables.
+
+### Merging
+
+The simplest way yo do a merge is like follows 
+
+```php
+$diff->tables('base_table','merge_table')
+    ->pivot('id')
+    ->column('column_to_update')
+    ->merge();
+```
+
+The above code snippet will update the `column_to_update` column values from base_table 
+with the `column_to_update` column values of merge_table in matched ids.
+  
+> Notice that `merge` method will update the matched records and also add those records that are new for base table.
+
+Just merging matched records
+
+```php
+diff->tables('base_table','merge_table')
+    ->pivot('id')
+    ->column('column_to_update')
+    ->mergeMatched();
+```
+
+Now, let's insert the new records.
+
+```php
+diff->tables('base_table','merge_table')
+    ->pivot('id')
+    ->column('column_to_update')
+    ->mergeUnMatched();
+```
+
+`merge`, `mergeMatched` and `mergeUnMatched` methods accept callbacks before doing the merge and just after each update.
+
+
+Before callback is perfect for casting data like. It takes the data which will be added.
+
+```php
+$ddiff->tables('base_table','merge_table')
+            ->pivot('id')
+            ->column('column_to_update')
+            ->merge(null,function(&$data){
+                // HERE your code
+                $data->column_to_update = (float) $data->column_to_update;
+            });
+```
+
+The first callback is call each time the db is updated. It takes the collection to be updated and the data with the new values 
+ 
+```php
+$diff->tables('base_table','merge_table')
+    ->pivot('id')
+    ->column('column_to_update')
+    ->merge(function($collection,$data){
+        //HERE your code
+    });
+```
+
+In case of `mergeUnMatched`, the first callback takes the new elements to be added and is called for each chunk (By default 10)
+
+```php
+$diff->tables('base_table','merge_table')
+    ->pivot('id')
+    ->column('column_to_update')
+    ->mergeUnMatched(function($list){
+        //HERE your code
+    });
 ```
