@@ -241,7 +241,7 @@ class TableDiff
      * Also Insert new values from merge table to base table.
      *
      * @param callable $callback
-     * @param null $preCallBack
+     * @param callable $preCallBack
      * @return $this
      */
     public function merge($callback = null,$preCallBack = null)
@@ -259,7 +259,7 @@ class TableDiff
      * Insert new values that are in merge table but not in base table.
      *
      * @param callable $callback
-     * @param null $preCallback
+     * @param callable $preCallback
      * @return $this
      */
     public function mergeUnMatched($callback = null,$preCallback = null)
@@ -278,7 +278,7 @@ class TableDiff
      * !Notice it won't update the new items found in merge that are not in base table.
      *
      * @param callable $callback
-     * @param $preCallback
+     * @param callable $preCallback
      * @return $this
      */
     public function mergeMatched($callback = null,$preCallback = null)
@@ -428,11 +428,12 @@ class TableDiff
      *
      * @param callable $callback
      * @param null $preCallback
+     * @param int $chunk
      */
-    private function insertUnMatched($callback = null,$preCallback = null)
+    private function insertUnMatched($callback = null,$preCallback = null,$chunk = 10)
     {
 
-        $this->report->unmatched()->chunk(10)->each(function ($collect) use($callback,$preCallback) {
+        $this->report->unmatched()->chunk($chunk)->each(function ($collect) use($callback,$preCallback) {
             $newElements = $collect->map(function ($item,$preCallback) {
 
                 //Unset primary key property because it can create Integrity constraint violation: Duplicate ID
@@ -453,10 +454,10 @@ class TableDiff
 
                 return get_object_vars($item);
 
-            })->toArray();
+            });
 
-            if (!empty($newElements)){
-                $inserted = DB::table($this->baseTable)->insert($newElements);
+            if (!$newElements->isEmpty()){
+                $inserted = DB::table($this->baseTable)->insert($newElements->toArray());
 
                 if($inserted)
                 {
