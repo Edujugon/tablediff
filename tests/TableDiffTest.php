@@ -218,6 +218,7 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
             });
     }
 
+
     /** @test */
     public function using_callback_in_merge_unmatched()
     {
@@ -259,6 +260,25 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
 
                 $city = $data->city;
                 $data->city = strtoupper($data->city);
+            });
+    }
+
+    /** @test */
+    public function using_callback_after_adding_new_elements()
+    {
+        $new = \Edujugon\TableDiffTest\Models\SubArea::whereNotIn('id',\Edujugon\TableDiffTest\Models\MainArea::all('id')->toArray())
+                ->pluck('city')
+                ->toArray();
+
+        $report = $this->diff->tables('main_areas','sub_areas')
+            ->pivot('id')
+            ->column('city')
+            ->mergeUnMatched(function($collection) use($new){
+                $collection->each(function ($item,$key) use($new){
+
+                    $this->assertEquals($item['city'],$new[$key]);
+                });
+
             });
     }
 }
