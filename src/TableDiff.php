@@ -3,10 +3,13 @@
 namespace Edujugon\TableDiff;
 
 
+use Edujugon\TableDiff\Events\MergeDone;
 use Edujugon\TableDiff\Exceptions\TableDiffException;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 
 class TableDiff
@@ -270,6 +273,9 @@ class TableDiff
 
         $this->insertUnMatched($callback,$preCallback);
 
+        Event::fire(new MergeDone('unmatched',$this->report));
+
+
         return $this;
     }
 
@@ -288,6 +294,8 @@ class TableDiff
         $this->createNewColumnsInBaseTable();
 
         $this->updateBaseTable($callback,$preCallback);
+
+        Event::fire(new MergeDone('matched',$this->report));
 
         return $this;
     }
