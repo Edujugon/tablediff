@@ -23,13 +23,22 @@ class MergeDone
     protected $report;
 
     /**
+     * Type of merge
+     *
+     * @var string
+     */
+    private $type;
+
+    /**
      * MergeDone constructor.
      *
-     * @param $report
+     * @param string $type
+     * @param MyReport $report
      */
-    function __construct($report)
+    function __construct($type,$report)
     {
         $this->report = $report;
+        $this->type = $type;
     }
 
     /**
@@ -40,5 +49,15 @@ class MergeDone
     function getReport()
     {
         return $this->report;
+    }
+
+    /**
+     * Get type of report
+     *
+     * @return string
+     */
+    function getType()
+    {
+        return $this->type;
     }
 }
