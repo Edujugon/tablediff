@@ -85,6 +85,8 @@ class TableDiff
      */
     protected $primaryKey = 'id';
 
+    protected $eventPayload = null;
+
     //
     //API METHODS
     //
@@ -273,7 +275,7 @@ class TableDiff
 
         $this->insertUnMatched($callback,$preCallback);
 
-        Event::fire(new MergeDone('unmatched',$this->report));
+        Event::fire(new MergeDone('unmatched',$this->report,$this->eventPayload));
 
 
         return $this;
@@ -295,13 +297,31 @@ class TableDiff
 
         $this->updateBaseTable($callback,$preCallback);
 
-        Event::fire(new MergeDone('matched',$this->report));
+        Event::fire(new MergeDone('matched',$this->report,$this->eventPayload));
 
         return $this;
     }
 
 
-    //GETTERS
+    /**
+     * Set the extra payload for the event
+     *
+     * @param array $payload
+     */
+    public function eventPayload($payload)
+    {
+        $this->eventPayload = $payload;
+    }
+
+    /**
+     * Get the event payload
+     *
+     * @return array
+     */
+    public function getEventPayload()
+    {
+        return $this->eventPayload;
+    }
 
     /**
      * Set the primary key of the base table.

@@ -30,15 +30,24 @@ class MergeDone
     private $type;
 
     /**
+     * Extra payload provided by user
+     *
+     * @var array
+     */
+    private $extra;
+
+    /**
      * MergeDone constructor.
      *
      * @param string $type
      * @param MyReport $report
+     * @param array $extra
      */
-    function __construct($type,$report)
+    function __construct($type,$report,$extra = [])
     {
         $this->report = $report;
         $this->type = $type;
+        $this->extra = $extra;
     }
 
     /**
