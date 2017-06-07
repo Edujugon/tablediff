@@ -281,4 +281,13 @@ class TableDiffTest extends Orchestra\Testbench\TestCase
 
             });
     }
+
+    /** @test */
+    public function add_payload_to_the_event()
+    {
+        $this->diff->eventPayload(['user' => 'John Doe']);
+
+        $this->assertArrayHasKey('user',$this->diff->getEventPayload());
+        $this->assertEquals('John Doe',$this->diff->getEventPayload()['user']);
+    }
 }
