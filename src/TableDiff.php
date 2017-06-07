@@ -3,8 +3,10 @@
 namespace Edujugon\TableDiff;
 
 
+use Edujugon\TableDiff\Events\MergeDone;
 use Edujugon\TableDiff\Exceptions\TableDiffException;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -81,6 +83,21 @@ class TableDiff
      * @var string
      */
     protected $primaryKey = 'id';
+
+    /**
+     * Event dispatcher
+     *
+     * @var Dispatcher
+     */
+    protected $dispatcher;
+
+    /**
+     * TableDiff constructor.
+     */
+    public function __construct()
+    {
+        $this->dispatcher = new Dispatcher();
+    }
 
     //
     //API METHODS
@@ -270,6 +287,8 @@ class TableDiff
 
         $this->insertUnMatched($callback,$preCallback);
 
+        $this->dispatcher->fire(new MergeDone($this->report));
+
         return $this;
     }
 
@@ -288,6 +307,8 @@ class TableDiff
         $this->createNewColumnsInBaseTable();
 
         $this->updateBaseTable($callback,$preCallback);
+
+        $this->dispatcher->fire(new MergeDone($this->report));
 
         return $this;
     }
