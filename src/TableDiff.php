@@ -85,7 +85,12 @@ class TableDiff
      */
     protected $primaryKey = 'id';
 
-    protected $eventPayload = null;
+    /**
+     * Event payload
+     *
+     * @var array
+     */
+    protected $eventPayload = [];
 
     //
     //API METHODS
@@ -307,10 +312,13 @@ class TableDiff
      * Set the extra payload for the event
      *
      * @param array $payload
+     * @return $this
      */
     public function eventPayload($payload)
     {
         $this->eventPayload = $payload;
+
+        return $this;
     }
 
     /**

@@ -47,7 +47,7 @@ class MergeDone
     {
         $this->report = $report;
         $this->type = $type;
-        $this->extra = $payload;
+        $this->payload = $payload;
     }
 
     /**
