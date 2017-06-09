@@ -755,7 +755,7 @@ class TableDiff
     private function tableExist($name)
     {
         if (!Schema::hasTable($name))
-            throw new TableDiffException('Table not found');
+            throw new TableDiffException("Table '$name' not found");
     }
 
 
