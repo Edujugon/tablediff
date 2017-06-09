@@ -139,3 +139,24 @@ $diff->tables('base_table','merge_table')
         //HERE your code
     });
 ```
+
+#### Event
+
+Once the merge is done the package fires an event call `Edujugon\TableDiff\Events\MergeDone` with some useful parameters
+
+Parameters:
+
++   Merge type   
++   Report
++   Extra payload
+
+Extra payload can be anything you want to add the the event
+
+```php
+$diff->eventPayload(['user' => 'John Doe']);
+```
+> Kepp in mind that `eventPayload` method have to be called before calling `merge` method.
+
+That is perfect when need to do some actions after merging like store it in db, send notification, etc..
+
+   
