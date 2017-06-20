@@ -454,6 +454,27 @@ class TableDiff
                 if(is_callable($callback))
                     $callback($collection,$item);
 
+            }else{
+
+                //Remove from the report those values that haven't been updated
+
+                $noUpdated = $query->get();
+
+                $diff = $this->getReport()->diff();
+
+                $noUpdated->each(function ($baseItem) use($diff){
+
+                    foreach ($diff as $prop => $el){
+                        if(array_key_exists($baseItem->{$this->primaryKey},$el)){
+                            unset($diff->{$prop}[array_keys($el)[0]]);
+
+                            if(empty($diff->{$prop})){
+                                unset($diff->{$prop});
+                            }
+                        }
+                    }
+
+                });
             }
         }
 
