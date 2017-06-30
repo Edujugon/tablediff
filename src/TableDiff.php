@@ -466,7 +466,7 @@ class TableDiff
 
                     foreach ($diff as $prop => $el){
                         if(array_key_exists($baseItem->{$this->primaryKey},$el)){
-                            unset($diff->{$prop}[array_keys($el)[0]]);
+                            unset($diff->{$prop}[$baseItem->{$this->primaryKey}]);
 
                             if(empty($diff->{$prop})){
                                 unset($diff->{$prop});
