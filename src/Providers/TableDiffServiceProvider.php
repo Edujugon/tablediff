@@ -21,7 +21,7 @@ class TableDiffServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(TableDiff::class, function ($app) {
+        $this->app->bind(TableDiff::class, function ($app) {
             return new TableDiff();
         });
     }
